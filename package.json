@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build --configLoader runner",
-    "build:pages": "tsc --noEmit && vite build --configLoader runner --outDir docs",
+    "dev": "vite --open /app.html",
+    "build": "tsc --noEmit && vite build --configLoader runner && node scripts/finalize-build.mjs dist",
+    "build:pages": "tsc --noEmit && vite build --configLoader runner --outDir docs && node scripts/finalize-build.mjs docs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

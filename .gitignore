@@ -1,6 +1,7 @@
 node_modules/
 dist/
 !docs/
+!assets/
 *.tsbuildinfo
 .DS_Store
 .env
