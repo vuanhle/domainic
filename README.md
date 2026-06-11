@@ -28,6 +28,8 @@ The project is configured for the `/domainic/` GitHub Pages subpath in `vite.con
 
 In repository **Settings > Pages**, set **Source** to **GitHub Actions**.
 
+For branch-based Pages deployment, run `npm run build:pages`, commit `docs/`, and select **Deploy from a branch**, branch `main`, folder `/docs`.
+
 ## Vercel
 
 Import the GitHub repository into Vercel, keep the framework preset as Vite, and deploy.

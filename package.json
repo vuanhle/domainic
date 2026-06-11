@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build --configLoader runner",
+    "build:pages": "tsc --noEmit && vite build --configLoader runner --outDir docs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
