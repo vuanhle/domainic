@@ -9,23 +9,14 @@ export function InvestorContactWidget() {
   const pinnedOpen = useRef(false);
 
   useEffect(() => {
-    const onPointerMove = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse") return;
-      if (pinnedOpen.current) return;
-      const distanceFromRight = window.innerWidth - event.clientX;
-      const distanceFromBottom = window.innerHeight - event.clientY;
-      setOpen(distanceFromRight < 190 && distanceFromBottom < 170);
-    };
     const onPointerDown = (event: PointerEvent) => {
       if (!widgetRef.current?.contains(event.target as Node)) {
         pinnedOpen.current = false;
         setOpen(false);
       }
     };
-    window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerdown", onPointerDown);
     return () => {
-      window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
     };
   }, []);
