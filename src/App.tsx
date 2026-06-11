@@ -11,7 +11,7 @@ const components=["Prompts","Tools","APIs","Workflow logic","Domain rules","Eval
 function Mark({word=true}:{word?:boolean}){return <div className="brand"><img src={`${import.meta.env.BASE_URL}domainic-logo.png`}/>{word&&<span className="mono">DOMAINIC / 01</span>}</div>}
 function Button({children,onClick,subtle=false}:{children:ReactNode;onClick?:()=>void;subtle?:boolean}){return <button className={subtle?"btn subtle":"btn"} onClick={onClick}>{children}<ArrowRight size={14}/></button>}
 function Tag({children,hot=false}:{children:ReactNode;hot?:boolean}){return <span className={hot?"tag hot":"tag"}>{children}</span>}
-function SectionTitle({kicker,title,copy}:{kicker:string;title:string;copy?:string}){return <div className="section-title"><span>{kicker}</span><h2>{title}</h2>{copy&&<p>{copy}</p>}</div>}
+function SectionTitle({kicker,title,copy,art}:{kicker:string;title:string;copy?:string;art?:string}){const number=kicker.slice(0,2);const artMap:Record<string,string>={"01":"workflow-bottleneck.png","02":"skill-pack-object.png","03":"system-flow.png","04":"product-surfaces.png","05":"system-flow.png","06":"skill-pack-object.png","07":"workflow-bottleneck.png"};const chosen=art||artMap[number];return <div className={chosen?"section-title with-art":"section-title"}><div><span>{kicker}</span><h2>{title}</h2>{copy&&<p>{copy}</p>}</div>{chosen&&<figure className="section-art"><img src={`${import.meta.env.BASE_URL}illustrations/${chosen}`} alt=""/><i/><i/><i/></figure>}</div>}
 function LogoMark(){return <div className="logo-mark"><i/><i/><i/><i/><i/></div>}
 
 function Landing({openDemo}:{openDemo:()=>void}){
