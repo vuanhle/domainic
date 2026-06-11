@@ -1,59 +1,1365 @@
-import { useEffect,useState,type ReactNode } from "react";
-import { Activity,AlertTriangle,ArrowRight,BarChart3,BookOpen,Boxes,Building2,Check,ChevronRight,CircleDot,ClipboardCheck,Code2,Command,Database,FileCheck2,GitBranch,Globe2,Grid2X2,HeartPulse,LayoutDashboard,Library,Linkedin,LockKeyhole,Mail,Menu,Orbit,PackageCheck,Play,Plus,Search,ShieldCheck,ShoppingBag,Sparkles,Terminal,TestTube2,Upload,UserRound,Workflow,X,Zap } from "lucide-react";
-import { Area,AreaChart,CartesianGrid,Line,LineChart,ResponsiveContainer,Tooltip,XAxis,YAxis } from "recharts";
-import { failures,founder,packs,sampleSop,trend } from "./data";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  Boxes,
+  Building2,
+  Check,
+  ChevronRight,
+  CircleDot,
+  ClipboardCheck,
+  Code2,
+  Command,
+  Database,
+  FileCheck2,
+  GitBranch,
+  Globe2,
+  Grid2X2,
+  HeartPulse,
+  LayoutDashboard,
+  Library,
+  Linkedin,
+  LockKeyhole,
+  Mail,
+  Menu,
+  Orbit,
+  PackageCheck,
+  Play,
+  Plus,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Terminal,
+  TestTube2,
+  Upload,
+  UserRound,
+  Workflow,
+  X,
+  Zap,
+} from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { failures, founder, packs, sampleSop, trend } from "./data";
 import type { SkillPack } from "./types";
 import { InvestorContactWidget } from "./components/InvestorContactWidget";
 
-type Page="dashboard"|"builder"|"packs"|"evaluation"|"runtime"|"composer"|"marketplace"|"failure"|"investor";
-const nav:[Page,string,ReactNode][]=[["dashboard","Dashboard",<LayoutDashboard/>],["builder","Builder",<Sparkles/>],["packs","Skill Packs",<PackageCheck/>],["evaluation","Evaluation",<ClipboardCheck/>],["runtime","Runtime",<Terminal/>],["composer","Agent Composer",<Workflow/>],["marketplace","Marketplace",<ShoppingBag/>],["failure","Failure Intelligence",<AlertTriangle/>],["investor","Investor Mode",<Zap/>]];
-const components=["Prompts","Tools","APIs","Workflow logic","Domain rules","Eval tests","Guardrails","Failure handling","Deployment metadata"];
+type Page =
+  | "dashboard"
+  | "builder"
+  | "packs"
+  | "evaluation"
+  | "runtime"
+  | "composer"
+  | "marketplace"
+  | "failure"
+  | "investor";
+const nav: [Page, string, ReactNode][] = [
+  ["dashboard", "Dashboard", <LayoutDashboard />],
+  ["builder", "Builder", <Sparkles />],
+  ["packs", "Skill Packs", <PackageCheck />],
+  ["evaluation", "Evaluation", <ClipboardCheck />],
+  ["runtime", "Runtime", <Terminal />],
+  ["composer", "Agent Composer", <Workflow />],
+  ["marketplace", "Marketplace", <ShoppingBag />],
+  ["failure", "Failure Intelligence", <AlertTriangle />],
+  ["investor", "Investor Mode", <Zap />],
+];
+const components = [
+  "Prompts",
+  "Tools",
+  "APIs",
+  "Workflow logic",
+  "Domain rules",
+  "Eval tests",
+  "Guardrails",
+  "Failure handling",
+  "Deployment metadata",
+];
 
-function Mark({word=true}:{word?:boolean}){return <div className="brand"><img src={`${import.meta.env.BASE_URL}domainic-logo.png`}/>{word&&<span className="mono">DOMAINIC / 01</span>}</div>}
-function Button({children,onClick,subtle=false}:{children:ReactNode;onClick?:()=>void;subtle?:boolean}){return <button className={subtle?"btn subtle":"btn"} onClick={onClick}>{children}<ArrowRight size={14}/></button>}
-function Tag({children,hot=false}:{children:ReactNode;hot?:boolean}){return <span className={hot?"tag hot":"tag"}>{children}</span>}
-function SectionTitle({kicker,title,copy,art}:{kicker:string;title:string;copy?:string;art?:string}){const number=kicker.slice(0,2);const artMap:Record<string,string>={"01":"workflow-bottleneck.png","02":"skill-pack-object.png","03":"system-flow.png","04":"product-surfaces.png","05":"system-flow.png","06":"skill-pack-object.png","07":"workflow-bottleneck.png"};const chosen=art||artMap[number];return <div className={chosen?"section-title with-art":"section-title"}><div><span>{kicker}</span><h2>{title}</h2>{copy&&<p>{copy}</p>}</div>{chosen&&<figure className="section-art"><img src={`${import.meta.env.BASE_URL}illustrations/${chosen}`} alt=""/><i/><i/><i/></figure>}</div>}
-function LogoMark(){return <div className="logo-mark"><i/><i/><i/><i/><i/></div>}
-
-function Landing({openDemo}:{openDemo:()=>void}){
- const [menu,setMenu]=useState(false);
- return <main className="landing">
-  <nav className="topnav"><Mark/><div className={menu?"navlinks show":"navlinks"}><a href="#thesis">Thesis</a><a href="#product">Product</a><a href="#founder">Founder</a><Button onClick={openDemo}>Launch demo</Button></div><button className="mobile-menu" onClick={()=>setMenu(!menu)}><Menu/></button></nav>
-  <section className="hero">
-   <div className="hero-copy"><Tag hot>PRE-SEED CONCEPT DEMO · 2026</Tag><h1>The domain-skill infrastructure layer for <em>AI agents.</em></h1><p>Domainic packages expert workflows into verified, deployable, monetizable Skill Packs that agents can call safely.</p><div className="actions"><Button onClick={openDemo}>Launch product demo</Button><a href="#object" className="btn subtle">View Skill Pack example <ArrowRight size={14}/></a></div><small>Static prototype · Mock data only · No real customer data</small></div>
-   <div className="hero-visual"><div className="orbit"/><LogoMark/><div className="signal s1"><span>INPUT / EXPERT SOP</span><b>Literature audit protocol</b></div><div className="signal s2"><span>VERIFICATION</span><b>94.0 / CERTIFIED</b></div><div className="signal s3"><span>RUNTIME</span><b>98.2% success</b></div><div className="signal s4"><span>FAILURE LOOP</span><b>−31% unsupported claims</b></div><div className="center-card"><span>SKILL PACK / 01</span><PackageCheck/><b>Reproducibility Audit</b><small>9 governed components</small></div></div>
-  </section>
-  <div className="ticker"><span>DOMAIN RULES</span><span>TOOL PERMISSIONS</span><span>EVALUATION TESTS</span><span>FAILURE RECOVERY</span><span>VERSION CONTROL</span><span>CERTIFICATION</span></div>
-  <section id="thesis" className="light-section"><SectionTitle kicker="01 / THE BOTTLENECK" title="Professional workflows are trapped in human heads and scattered SOPs." copy="The bottleneck is no longer model access. It is domain translation, verification, and deployment trust."/><div className="three"><Info n="01" title="Experts hold the rules" text="Valuable workflows remain tacit, fragmented, and difficult to encode into reliable agent modules."/><Info n="02" title="Builders lack context" text="Agent builders can wire prompts and APIs, but rarely hold the domain judgment needed for real work."/><Info n="03" title="Enterprises need proof" text="Auditability, safety, and repeatability are prerequisites before agents can touch professional workflows."/></div></section>
-  <section id="object" className="object-section"><SectionTitle kicker="02 / THE PRODUCT OBJECT" title="A Skill Pack is not a prompt." copy="It is a packaged, tested, governed workflow module that agents can call safely."/><div className="object-grid"><div className="skill-object"><div className="object-head"><div><span>DOMAINIC / SKILL PACK</span><h3>Literature Review Reproducibility Audit</h3></div><Tag hot>CERTIFIED · 94</Tag></div><div className="component-grid">{components.map((x,i)=><div key={x}><span>0{i+1}</span><b>{x}</b></div>)}</div><div className="object-foot"><span>VERSION 1.2.0</span><span>RUNTIME READY</span><span>HUMAN APPROVAL REQUIRED</span></div></div><div className="object-copy"><h3>Reusable units of expert AI capability.</h3><p>Domainic turns operating knowledge into an inspectable object with rules, tools, tests, permissions, and a governed improvement loop.</p>{["Product object, not a chat wrapper","Builder-first supply engine","Verification built into the lifecycle","Failure intelligence compounds quality"].map(x=><div className="checkline" key={x}><Check/> {x}</div>)}</div></div></section>
-  <section id="product" className="flow-section"><SectionTitle kicker="03 / SYSTEM FLOW" title="From expert workflow to governed execution."/><div className="pipeline">{["Expert workflow","Builder","Verified Skill Pack","Agent Composer","Deployment","Failure Intelligence"].map((x,i)=><div className="pipe" key={x}><span>0{i+1}</span><b>{x}</b>{i<5&&<ChevronRight/>}</div>)}</div></section>
-  <section className="surfaces"><SectionTitle kicker="04 / PRODUCT SURFACES" title="An infrastructure layer, not a single feature."/><div className="surface-grid">{[["Builder","Extracts rules, tools, tests, and guardrails.","8 workflow steps",Sparkles],["Skill Pack Core","The versioned, governed unit of capability.","9 component classes",PackageCheck],["Evaluation & Certification","Measures accuracy, robustness, safety, and recovery.","94 score",ShieldCheck],["Runtime","Executes with permissions, checks, and logs.","98.2% success",Terminal],["Agent Composer","Combines Skill Packs into custom agents.","4 pack workflow",Workflow],["Marketplace","Distributes reusable expert capability.","6 demo listings",ShoppingBag],["Failure Intelligence","Turns governed failures into improvements.","−31% key failure",AlertTriangle],["Dashboard","Operational view across the system.","6 health signals",BarChart3]].map(([t,d,m,I]:any)=><div className="surface" key={t}><I/><span>PRODUCT ROLE</span><h3>{t}</h3><p>{d}</p><b>{m}</b></div>)}</div></section>
-  <section className="light-section"><SectionTitle kicker="05 / INITIAL ICP" title="Start where expert workflows are high-value and inspectable."/><div className="icp"><div>{["Academic research labs","Computational biology teams","Healthcare operations","AI consultancies"].map((x,i)=><p key={x}><span>0{i+1}</span>{x}</p>)}</div><div className="beachhead"><span>BEACHHEAD SEQUENCE</span><b>Research labs</b><ArrowRight/><b>Healthcare operations</b><ArrowRight/><b>Enterprise compliance</b></div></div></section>
-  <section className="compare"><SectionTitle kicker="06 / DIFFERENTIATION" title="Trust infrastructure for domain capability."/><div className="compare-table"><div><span>GENERIC AGENT TOOLS</span>{["Prompt / chat first","Templates without trust","One-off workflow builds","Opaque performance"].map(x=><p key={x}><X/> {x}</p>)}</div><div><span>DOMAINIC</span>{["Skill Pack as product object","Builder-first supply engine","Verification built in","Failure loop as moat"].map(x=><p key={x}><Check/> {x}</p>)}</div></div></section>
-  <section id="founder" className="founder"><SectionTitle kicker="07 / FOUNDER" title="Founder-led technical architecture."/><div className="founder-card"><div className="founder-id"><img className="founder-photo" src={`${import.meta.env.BASE_URL}vu-anh-le.jpg`} alt="Vu-Anh Le"/><Tag hot>SOLO FOUNDER</Tag><h3>{founder.name}</h3><p>{founder.affiliation}</p><div className="founder-links"><a href="https://www.linkedin.com/in/levuanh" target="_blank" rel="noreferrer"><Linkedin/>LinkedIn</a><a href="mailto:mcu7uh@virginia.edu"><Mail/>mcu7uh@virginia.edu</a></div></div><div className="founder-copy"><p>Domainic is founder-led by Vu-Anh Le, a Computer Science PhD student at the University of Virginia working on responsible AI for science and engineering.</p><div className="founder-points"><b>{founder.researchFocus}</b><b>{founder.experienceSummary}</b><b>Systems work spanning cyberthreat detection, chemical safety calculation, and domain-specific AI automation.</b><b><a href="https://icml.cc/virtual/2025/51024" target="_blank" rel="noreferrer">Publication record in ICML,</a> a top-tier AI and machine learning venue.</b></div><div className="institution-strip"><span className="institution-label">AFFILIATIONS & PUBLICATION VENUE</span><div className="institution-logos"><a className="institution uva" href="https://www.virginia.edu/" target="_blank" rel="noreferrer" aria-label="University of Virginia"><Building2/><strong>University <i>of</i> Virginia</strong></a><a className="institution mit" href="https://www.mit.edu/" target="_blank" rel="noreferrer" aria-label="Massachusetts Institute of Technology"><span className="mit-mark"><i/><i/><i/><i/><i/><i/><i/></span><strong>MIT</strong></a><a className="institution vast" href="https://vast.gov.vn/" target="_blank" rel="noreferrer" aria-label="Vietnam Academy of Science and Technology"><Orbit/><strong>VAST<small>Vietnam Academy of Science & Technology</small></strong></a><a className="institution icml" href="https://icml.cc/" target="_blank" rel="noreferrer" aria-label="International Conference on Machine Learning"><span className="icml-mark"><i/><i/><i/><i/></span><strong>ICML<small>International Conference on Machine Learning</small></strong></a></div></div></div></div></section>
-  <section className="final-cta"><LogoMark/><span>DOMAIN EXPERTISE / STRUCTURED</span><h2>Expert workflows → agent-ready skills.</h2><div className="actions"><Button onClick={openDemo}>Open investor demo</Button><Button onClick={openDemo} subtle>Create sample Skill Pack</Button></div></section>
-  <footer><Mark/><span>Vu-Anh Le · Pre-seed concept demo · 2026</span></footer>
- </main>
+function Mark({ word = true }: { word?: boolean }) {
+  return (
+    <div className="brand">
+      <img src={`${import.meta.env.BASE_URL}domainic-logo.png`} />
+      {word && <span className="mono">DOMAINIC / 01</span>}
+    </div>
+  );
 }
-function Info({n,title,text}:{n:string;title:string;text:string}){return <div className="info"><span>{n}</span><h3>{title}</h3><p>{text}</p></div>}
-
-function Shell({page,setPage,exit}:{page:Page;setPage:(p:Page)=>void;exit:()=>void}){
- return <div className="app"><aside><Mark word={false}/><div className="side-id"><span>DOMAINIC</span><small>CONTROL PLANE / DEMO</small></div><nav>{nav.map(([id,label,icon])=><button onClick={()=>setPage(id)} className={page===id?"active":""} key={id}>{icon}{label}</button>)}</nav><div className="side-bottom"><Tag hot>PRE-SEED</Tag><p>Illustrative metrics<br/>Static prototype</p><button onClick={exit}><Globe2/> Public site</button></div></aside><div className="app-main"><header><div><span className="eyebrow">DOMAINIC / WORKSPACE</span><b>{nav.find(n=>n[0]===page)?.[1]}</b></div><div className="header-actions"><Tag>ALL SYSTEMS NOMINAL</Tag><button><Search/></button><div className="avatar small">VL</div></div></header><div className="page">{page==="dashboard"?<Dashboard setPage={setPage}/>:page==="builder"?<Builder setPage={setPage}/>:page==="packs"?<Packs/>:page==="evaluation"?<Evaluation/>:page==="runtime"?<Runtime/>:page==="composer"?<Composer/>:page==="marketplace"?<Marketplace/>:page==="failure"?<Failure/>:<Investor setPage={setPage}/>}</div></div></div>
+function Button({
+  children,
+  onClick,
+  subtle = false,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  subtle?: boolean;
+}) {
+  return (
+    <button className={subtle ? "btn subtle" : "btn"} onClick={onClick}>
+      {children}
+      <ArrowRight size={14} />
+    </button>
+  );
 }
-function PageTitle({k,title,copy,action}:{k:string;title:string;copy:string;action?:ReactNode}){return <div className="page-title"><div><span>{k}</span><h1>{title}</h1><p>{copy}</p></div>{action}</div>}
-function Metric({label,value,delta}:{label:string;value:string;delta?:string}){return <div className="metric"><span>{label}</span><b>{value}</b>{delta&&<small>{delta}</small>}</div>}
-function Panel({title,children,className=""}:{title:string;children:ReactNode;className?:string}){return <section className={`panel ${className}`}><div className="panel-title"><b>{title}</b><span>ILLUSTRATIVE</span></div>{children}</section>}
-function TrendChart({kind="usage"}:{kind?:"usage"|"score"|"fail"}){return <ResponsiveContainer width="100%" height={190}><AreaChart data={trend}><defs><linearGradient id={`g${kind}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={kind==="fail"?"#ff705c":"#b6ff3b"} stopOpacity={.4}/><stop offset="100%" stopColor="#b6ff3b" stopOpacity={0}/></linearGradient></defs><CartesianGrid stroke="#283026" strokeDasharray="3 3"/><XAxis dataKey="n" stroke="#70786c"/><YAxis stroke="#70786c"/><Tooltip contentStyle={{background:"#11140f",border:"1px solid #384132"}}/><Area type="monotone" dataKey={kind} stroke={kind==="fail"?"#ff705c":"#b6ff3b"} fill={`url(#g${kind})`}/></AreaChart></ResponsiveContainer>}
-function Dashboard({setPage}:{setPage:(p:Page)=>void}){return <><PageTitle k="SYSTEM OVERVIEW / 00" title="Domain capability control plane" copy="Operational view across creation, verification, deployment, and learning." action={<Button onClick={()=>setPage("builder")}>Create Skill Pack</Button>}/><div className="metrics"><Metric label="ACTIVE SKILL PACKS" value="06" delta="+2 this month"/><Metric label="VERIFIED PACKS" value="04" delta="66.7% of library"/><Metric label="AVG CERTIFICATION" value="91.0" delta="+3.2 pts"/><Metric label="RUNTIME SUCCESS" value="97.4%" delta="+1.8%"/><Metric label="FAILURE RATE" value="4.1%" delta="−0.7%"/></div><div className="dashboard-grid"><Panel title="USAGE OVER TIME" className="wide"><TrendChart/></Panel><Panel title="SYSTEM HEALTH"><div className="health">{["Runtime","Evaluation engine","Pack registry","Failure pipeline","Marketplace index"].map(x=><p key={x}><Check/>{x}<b>Healthy</b></p>)}</div></Panel><Panel title="CERTIFICATION TREND"><TrendChart kind="score"/></Panel><Panel title="RECENT RUNS" className="wide"><table><tbody>{packs.slice(0,4).map((p,i)=><tr key={p.id}><td><CircleDot/>{p.name}</td><td>{p.domain}</td><td>{p.successRate}% success</td><td><Tag hot>{i===3?"REVIEW":"COMPLETE"}</Tag></td></tr>)}</tbody></table></Panel></div></>}
-function Builder({setPage}:{setPage:(p:Page)=>void}){const [sop,setSop]=useState(sampleSop);const [stage,setStage]=useState<"idle"|"extracting"|"done">(()=>localStorage.getItem("domainic-pack")?"done":"idle");const generate=()=>{setStage("extracting");setTimeout(()=>{localStorage.setItem("domainic-pack",JSON.stringify(packs[0]));setStage("done")},1200)};return <><PageTitle k="BUILDER / SUPPLY ENGINE" title="SOP → governed Skill Pack" copy="Deterministic concept extraction. No LLM or external API is used." action={<Tag hot>{stage==="done"?"PACK GENERATED":"CAPTURE MODE"}</Tag>}/><div className="builder-grid"><Panel title="01 / EXPERT WORKFLOW INPUT" className="builder-input"><div className="input-tools"><Button subtle><Upload/> Add .txt / .md</Button><button onClick={()=>setSop(sampleSop)}>Load sample SOP</button></div><textarea value={sop} onChange={e=>setSop(e.target.value)}/><Button onClick={generate}>{stage==="extracting"?"Extracting structure…":"Generate Skill Pack"}</Button></Panel><Panel title="EXTRACTION MAP"><div className="extract-map">{components.map((x,i)=><div key={x} className={stage!=="idle"?"found":""}><span>0{i+1}</span><b>{x}</b><Check/></div>)}</div></Panel></div>{stage==="done"&&<Panel title="GENERATED SKILL PACK" className="generated"><div className="generated-head"><PackageCheck/><div><Tag hot>DRAFT / READY FOR EVALUATION</Tag><h2>Literature Review Reproducibility Audit Pack</h2><p>Research / AI-Biology · v1.0.0 · 9 component classes</p></div><div className="actions"><Button subtle onClick={()=>setPage("packs")}>Open Skill Pack</Button><Button onClick={()=>setPage("evaluation")}>Run Evaluation</Button></div></div><div className="steps">{packs[0].workflowSteps.map((x,i)=><div key={x}><span>{i+1}</span>{x}</div>)}</div></Panel>}</>}
-function PackCard({p,onOpen}:{p:SkillPack;onOpen:()=>void}){return <button className="pack-card" onClick={onOpen}><div><PackageCheck/><Tag hot>{p.status}</Tag></div><span>{p.domain}</span><h3>{p.name}</h3><p>{p.description}</p><div className="pack-stats"><b>{p.certificationScore}<small>score</small></b><b>{p.successRate}%<small>success</small></b><b>{p.installs}<small>installs</small></b></div></button>}
-function Packs(){const [selected,setSelected]=useState<SkillPack|null>(null);return <><PageTitle k="SKILL PACK REGISTRY / 06" title="Versioned units of expert capability" copy="Each pack combines operating logic, verification, governance, and deployment metadata."/><div className="pack-grid">{packs.map(p=><PackCard p={p} onOpen={()=>setSelected(p)} key={p.id}/>)}</div>{selected&&<div className="modal-back" onClick={()=>setSelected(null)}><div className="modal detail" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSelected(null)}><X/></button><Tag hot>{selected.status} · {selected.certificationScore}</Tag><h2>{selected.name}</h2><p>{selected.description}</p><div className="detail-grid"><div><h4>WORKFLOW STEPS</h4>{selected.workflowSteps.map(x=><p key={x}><Check/>{x}</p>)}</div><div><h4>DOMAIN RULES & GUARDRAILS</h4>{[...selected.domainRules,...selected.guardrails].map(x=><p key={x}><ShieldCheck/>{x}</p>)}</div><div><h4>RUNTIME PERMISSIONS</h4>{Object.entries(selected.deploymentMetadata).map(([a,b])=><p key={a}><LockKeyhole/>{a}: {b}</p>)}</div><div><h4>VERSION HISTORY</h4>{selected.versionHistory.map(x=><p key={x.version}><GitBranch/>{x.version} · {x.note}</p>)}</div></div></div></div>}</>}
-function Evaluation(){const [state,setState]=useState<"Ready"|"Queued"|"Running"|"Certified">("Ready");const run=()=>{setState("Queued");setTimeout(()=>setState("Running"),600);setTimeout(()=>setState("Certified"),1800)};return <><PageTitle k="EVALUATION / CERTIFICATION" title="Evidence before deployment" copy="Mock certification for Literature Review Reproducibility Audit Pack." action={<Button onClick={run}><Play/> Run mock evaluation</Button>}/><div className="evaluation-grid"><div className="score-ring"><div><b>{state==="Certified"?"94":"91"}</b><span>OVERALL SCORE</span></div><Tag hot>{state}</Tag></div><Panel title="SCORE TREND"><TrendChart kind="score"/></Panel><Panel title="CERTIFICATION DIMENSIONS"><div className="bars">{[["Accuracy",96],["Citation verification",94],["Tool-use correctness",93],["Robustness",89],["Compliance / safety",97],["Recovery / fallback",92]].map(([x,n])=><div key={x as string}><span>{x}</span><i><b style={{width:`${n}%`}}/></i><strong>{n}</strong></div>)}</div></Panel></div><Panel title="TEST SUITE"><table><thead><tr><th>Test</th><th>Purpose</th><th>Score</th><th>Status</th></tr></thead><tbody>{packs[0].evalTests.map(t=><tr key={t.id}><td>{t.name}</td><td>{t.purpose}</td><td>{t.score}</td><td><Tag hot>{t.status}</Tag></td></tr>)}</tbody></table></Panel></>}
-function Runtime(){const [running,setRunning]=useState(false);const [done,setDone]=useState(false);const run=()=>{setRunning(true);setDone(false);setTimeout(()=>{setRunning(false);setDone(true)},1800)};return <><PageTitle k="RUNTIME / GOVERNED EXECUTION" title="Execute with permissions, checks, and logs" copy="Every action is inspectable. Human approval remains in the loop." action={<Button onClick={run}><Play/> Run Skill Pack</Button>}/><div className="runtime-grid"><Panel title="RUN INTERFACE" className="run-chat"><div className="user-msg">Audit this AI-biology paper summary for reproducibility risks.</div>{(running||done)&&<div className="run-process">{["Input validated","Permissions checked","Crossref lookup simulated","Citation evidence mapped","Unsupported claims checked","Human approval checkpoint"].map((x,i)=><div key={x} className={done||i<3?"complete":""}><span>{done||i<3?<Check/>:<Activity/>}</span>{x}</div>)}</div>}{done&&<div className="run-output"><Tag hot>HUMAN REVIEW REQUIRED</Tag><h3>Audit summary</h3><p>Two claims need stronger citation support. Dataset availability is documented; code availability remains unverified. Reproducibility risk: medium.</p></div>}</Panel><div><Panel title="ACTIVE GUARDRAILS"><div className="guardrails">{packs[0].guardrails.map(x=><p key={x}><ShieldCheck/>{x}<b>ON</b></p>)}</div></Panel><Panel title="RUN LOG"><div className="log">run_id: dm_7fa91<br/>pack: audit@1.2.0<br/>latency: {done?"1.84s":"—"}<br/>retention: none<br/>status: {done?"awaiting_approval":"idle"}</div></Panel></div></div></>}
-function Composer(){const [run,setRun]=useState(false);const nodes=["Literature Review","Citation Verification","Reproducibility Audit","Grant Outline"];return <><PageTitle k="AGENT COMPOSER / ORCHESTRATION" title="Compose verified capabilities" copy="Guardrails and version constraints inherit across the workflow." action={<Button onClick={()=>setRun(true)}><Play/> Run composed agent</Button>}/><Panel title="RESEARCH-TO-GRANT AGENT" className="composer"><div className="nodes">{nodes.map((x,i)=><div className={run?"node done":"node"} key={x}><span>0{i+1}</span><PackageCheck/><b>{x}</b><small>v1.{i+1}.0 · verified</small>{i<nodes.length-1&&<ArrowRight/>}</div>)}</div><div className="branch"><GitBranch/><span>Conditional branch: unsupported claim → human review</span><Tag>GUARDRAILS INHERITED</Tag></div></Panel><div className="metrics"><Metric label="PACKS" value="04"/><Metric label="INHERITED RULES" value="17"/><Metric label="CHECKPOINTS" value="03"/><Metric label="EXPECTED SUCCESS" value="93.8%"/></div></>}
-function Marketplace(){const [filter,setFilter]=useState("All");return <><PageTitle k="MARKETPLACE / DISTRIBUTION" title="A market for verified domain capability" copy="Concept listings only. No real payments, creators, or certifications."/><div className="filters">{["All","Research","AI-Bio","Healthcare Ops","Compliance","Consulting"].map(x=><button className={filter===x?"active":""} onClick={()=>setFilter(x)} key={x}>{x}</button>)}</div><div className="market-grid">{packs.filter(p=>filter==="All"||p.domain.includes(filter.replace(" Ops",""))).map(p=><div className="listing" key={p.id}><div><Library/><Tag hot>{p.status}</Tag></div><span>{p.domain}</span><h3>{p.name}</h3><p>by {p.creator}</p><div className="listing-stats"><b>{p.certificationScore} score</b><b>{p.installs} installs</b><b>★ 4.8</b></div><div className="actions"><Button subtle>View docs</Button><Button>Install</Button></div></div>)}</div></>}
-function Failure(){return <><PageTitle k="FAILURE INTELLIGENCE / LEARNING LOOP" title="Governed failures become better Skill Packs" copy="Aggregated demo patterns reveal where rules, tools, and tests should improve."/><div className="metrics"><Metric label="FAILURE RATE" value="4.1%" delta="−0.7%"/><Metric label="MTTR" value="18.4m" delta="−14.1%"/><Metric label="OPEN CLUSTERS" value="05"/><Metric label="PRIVACY MODE" value="ON"/></div><div className="dashboard-grid"><Panel title="FAILURE RATE TREND" className="wide"><TrendChart kind="fail"/></Panel><Panel title="TOP IMPROVEMENTS">{failures.slice(0,4).map((f,i)=><div className="improve" key={f[0]}><span>0{i+1}</span><div><b>{f[2]}</b><small>Potential impact: −{28-i*5}% failures</small></div></div>)}</Panel></div><Panel title="FAILURE CLUSTERS"><table><thead><tr><th>Pattern</th><th>Root cause signal</th><th>Suggested fix</th><th>Impact</th></tr></thead><tbody>{failures.map(f=><tr key={f[0]}><td>{f[0]}</td><td>{f[1]}</td><td>{f[2]}</td><td><Tag hot={f[3]==="High"}>{f[3]}</Tag></td></tr>)}</tbody></table></Panel></>}
-const investorPrompt=`Create a Skill Pack for auditing an AI-biology research paper for reproducibility risks.
+function Tag({
+  children,
+  hot = false,
+}: {
+  children: ReactNode;
+  hot?: boolean;
+}) {
+  return <span className={hot ? "tag hot" : "tag"}>{children}</span>;
+}
+function SectionTitle({
+  kicker,
+  title,
+  copy,
+  art,
+}: {
+  kicker: string;
+  title: string;
+  copy?: string;
+  art?: string;
+}) {
+  const number = kicker.slice(0, 2);
+  const artMap: Record<string, string> = {
+    "01": "workflow-bottleneck.png",
+    "02": "skill-pack-object.png",
+    "03": "system-flow.png",
+    "04": "product-surfaces.png",
+    "05": "system-flow.png",
+    "06": "skill-pack-object.png",
+    "07": "workflow-bottleneck.png",
+  };
+  const chosen = art || artMap[number];
+  return (
+    <div className={chosen ? "section-title with-art" : "section-title"}>
+      <div>
+        <span>{kicker}</span>
+        <h2>{title}</h2>
+        {copy && <p>{copy}</p>}
+      </div>
+      {chosen && (
+        <figure className="section-art">
+          <img
+            src={`${import.meta.env.BASE_URL}illustrations/${chosen}`}
+            alt=""
+          />
+          <i />
+          <i />
+          <i />
+        </figure>
+      )}
+    </div>
+  );
+}
+function LogoMark() {
+  return (
+    <div className="logo-mark">
+      <i />
+      <i />
+      <i />
+      <i />
+      <i />
+    </div>
+  );
+}
+
+function Landing({ openDemo }: { openDemo: () => void }) {
+  const [menu, setMenu] = useState(false);
+  return (
+    <main className="landing">
+      <nav className="topnav">
+        <Mark />
+        <div className={menu ? "navlinks show" : "navlinks"}>
+          <a href="#thesis">Thesis</a>
+          <a href="#product">Product</a>
+          <a href="#founder">Founder</a>
+          <Button onClick={openDemo}>Launch demo</Button>
+        </div>
+        <button className="mobile-menu" onClick={() => setMenu(!menu)}>
+          <Menu />
+        </button>
+      </nav>
+      <section className="hero">
+        <div className="hero-copy">
+          <Tag hot>PRE-SEED CONCEPT DEMO · 2026</Tag>
+          <h1>
+            The domain-skill infrastructure layer for <em>AI agents.</em>
+          </h1>
+          <p>
+            Domainic packages expert workflows into verified, deployable,
+            monetizable Skill Packs that agents can call safely.
+          </p>
+          <div className="actions">
+            <Button onClick={openDemo}>Launch product demo</Button>
+            <a href="#object" className="btn subtle">
+              View Skill Pack example <ArrowRight size={14} />
+            </a>
+          </div>
+          <small>
+            Static prototype · Mock data only · No real customer data
+          </small>
+        </div>
+        <div className="hero-visual">
+          <div className="orbit" />
+          <LogoMark />
+          <div className="signal s1">
+            <span>INPUT / EXPERT SOP</span>
+            <b>Literature audit protocol</b>
+          </div>
+          <div className="signal s2">
+            <span>VERIFICATION</span>
+            <b>94.0 / CERTIFIED</b>
+          </div>
+          <div className="signal s3">
+            <span>RUNTIME</span>
+            <b>98.2% success</b>
+          </div>
+          <div className="signal s4">
+            <span>FAILURE LOOP</span>
+            <b>−31% unsupported claims</b>
+          </div>
+          <div className="center-card">
+            <span>SKILL PACK / 01</span>
+            <PackageCheck />
+            <b>Reproducibility Audit</b>
+            <small>9 governed components</small>
+          </div>
+        </div>
+      </section>
+      <div className="ticker">
+        <span>DOMAIN RULES</span>
+        <span>TOOL PERMISSIONS</span>
+        <span>EVALUATION TESTS</span>
+        <span>FAILURE RECOVERY</span>
+        <span>VERSION CONTROL</span>
+        <span>CERTIFICATION</span>
+      </div>
+      <section id="thesis" className="light-section">
+        <SectionTitle
+          kicker="01 / THE BOTTLENECK"
+          title="Professional workflows are trapped in human heads and scattered SOPs."
+          copy="The bottleneck is no longer model access. It is domain translation, verification, and deployment trust."
+        />
+        <div className="three">
+          <Info
+            n="01"
+            title="Experts hold the rules"
+            text="Valuable workflows remain tacit, fragmented, and difficult to encode into reliable agent modules."
+          />
+          <Info
+            n="02"
+            title="Builders lack context"
+            text="Agent builders can wire prompts and APIs, but rarely hold the domain judgment needed for real work."
+          />
+          <Info
+            n="03"
+            title="Enterprises need proof"
+            text="Auditability, safety, and repeatability are prerequisites before agents can touch professional workflows."
+          />
+        </div>
+      </section>
+      <section id="object" className="object-section">
+        <SectionTitle
+          kicker="02 / THE PRODUCT OBJECT"
+          title="A Skill Pack is not a prompt."
+          copy="It is a packaged, tested, governed workflow module that agents can call safely."
+        />
+        <div className="object-grid">
+          <div className="skill-object">
+            <div className="object-head">
+              <div>
+                <span>DOMAINIC / SKILL PACK</span>
+                <h3>Literature Review Reproducibility Audit</h3>
+              </div>
+              <Tag hot>CERTIFIED · 94</Tag>
+            </div>
+            <div className="component-grid">
+              {components.map((x, i) => (
+                <div key={x}>
+                  <span>0{i + 1}</span>
+                  <b>{x}</b>
+                </div>
+              ))}
+            </div>
+            <div className="object-foot">
+              <span>VERSION 1.2.0</span>
+              <span>RUNTIME READY</span>
+              <span>HUMAN APPROVAL REQUIRED</span>
+            </div>
+          </div>
+          <div className="object-copy">
+            <h3>Reusable units of expert AI capability.</h3>
+            <p>
+              Domainic turns operating knowledge into an inspectable object with
+              rules, tools, tests, permissions, and a governed improvement loop.
+            </p>
+            {[
+              "Product object, not a chat wrapper",
+              "Builder-first supply engine",
+              "Verification built into the lifecycle",
+              "Failure intelligence compounds quality",
+            ].map((x) => (
+              <div className="checkline" key={x}>
+                <Check /> {x}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section id="product" className="flow-section">
+        <SectionTitle
+          kicker="03 / SYSTEM FLOW"
+          title="From expert workflow to governed execution."
+        />
+        <div className="pipeline">
+          {[
+            "Expert workflow",
+            "Builder",
+            "Verified Skill Pack",
+            "Agent Composer",
+            "Deployment",
+            "Failure Intelligence",
+          ].map((x, i) => (
+            <div className="pipe" key={x}>
+              <span>0{i + 1}</span>
+              <b>{x}</b>
+              {i < 5 && <ChevronRight />}
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="surfaces">
+        <SectionTitle
+          kicker="04 / PRODUCT SURFACES"
+          title="An infrastructure layer, not a single feature."
+        />
+        <div className="surface-grid">
+          {[
+            [
+              "Builder",
+              "Extracts rules, tools, tests, and guardrails.",
+              "8 workflow steps",
+              Sparkles,
+            ],
+            [
+              "Skill Pack Core",
+              "The versioned, governed unit of capability.",
+              "9 component classes",
+              PackageCheck,
+            ],
+            [
+              "Evaluation & Certification",
+              "Measures accuracy, robustness, safety, and recovery.",
+              "94 score",
+              ShieldCheck,
+            ],
+            [
+              "Runtime",
+              "Executes with permissions, checks, and logs.",
+              "98.2% success",
+              Terminal,
+            ],
+            [
+              "Agent Composer",
+              "Combines Skill Packs into custom agents.",
+              "4 pack workflow",
+              Workflow,
+            ],
+            [
+              "Marketplace",
+              "Distributes reusable expert capability.",
+              "6 demo listings",
+              ShoppingBag,
+            ],
+            [
+              "Failure Intelligence",
+              "Turns governed failures into improvements.",
+              "−31% key failure",
+              AlertTriangle,
+            ],
+            [
+              "Dashboard",
+              "Operational view across the system.",
+              "6 health signals",
+              BarChart3,
+            ],
+          ].map(([t, d, m, I]: any) => (
+            <div className="surface" key={t}>
+              <I />
+              <span>PRODUCT ROLE</span>
+              <h3>{t}</h3>
+              <p>{d}</p>
+              <b>{m}</b>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="light-section">
+        <SectionTitle
+          kicker="05 / INITIAL ICP"
+          title="Start where expert workflows are high-value and inspectable."
+        />
+        <div className="icp">
+          <div>
+            {[
+              "Academic research labs",
+              "Computational biology teams",
+              "Healthcare operations",
+              "AI consultancies",
+            ].map((x, i) => (
+              <p key={x}>
+                <span>0{i + 1}</span>
+                {x}
+              </p>
+            ))}
+          </div>
+          <div className="beachhead">
+            <span>BEACHHEAD SEQUENCE</span>
+            <b>Research labs</b>
+            <ArrowRight />
+            <b>Healthcare operations</b>
+            <ArrowRight />
+            <b>Enterprise compliance</b>
+          </div>
+        </div>
+      </section>
+      <section className="compare">
+        <SectionTitle
+          kicker="06 / DIFFERENTIATION"
+          title="Trust infrastructure for domain capability."
+        />
+        <div className="compare-table">
+          <div>
+            <span>GENERIC AGENT TOOLS</span>
+            {[
+              "Prompt / chat first",
+              "Templates without trust",
+              "One-off workflow builds",
+              "Opaque performance",
+            ].map((x) => (
+              <p key={x}>
+                <X /> {x}
+              </p>
+            ))}
+          </div>
+          <div>
+            <span>DOMAINIC</span>
+            {[
+              "Skill Pack as product object",
+              "Builder-first supply engine",
+              "Verification built in",
+              "Failure loop as moat",
+            ].map((x) => (
+              <p key={x}>
+                <Check /> {x}
+              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section id="founder" className="founder">
+        <SectionTitle
+          kicker="07 / FOUNDER"
+          title="Founder-led technical architecture."
+        />
+        <div className="founder-card">
+          <div className="founder-id">
+            <img
+              className="founder-photo"
+              src={`${import.meta.env.BASE_URL}vu-anh-le.jpg`}
+              alt="Vu-Anh Le"
+            />
+            <Tag hot>SOLO FOUNDER</Tag>
+            <h3>{founder.name}</h3>
+            <p>{founder.affiliation}</p>
+            <div className="founder-links">
+              <a
+                href="https://www.linkedin.com/in/levuanh"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Linkedin />
+                LinkedIn
+              </a>
+              <a href="mailto:mcu7uh@virginia.edu">
+                <Mail />
+                mcu7uh@virginia.edu
+              </a>
+            </div>
+          </div>
+          <div className="founder-copy">
+            <p>
+              Domainic is founder-led by Vu-Anh Le, a Computer Science PhD
+              student at the University of Virginia working on responsible AI
+              for science and engineering.
+            </p>
+            <div className="founder-points">
+              <b>{founder.researchFocus}</b>
+              <b>{founder.experienceSummary}</b>
+              <b>
+                Systems work spanning cyberthreat detection, chemical safety
+                calculation, and domain-specific AI automation.
+              </b>
+              <b>
+                <a
+                  href="https://icml.cc/virtual/2025/51024"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Publication record in ICML,
+                </a>{" "}
+                a top-tier AI and machine learning venue.
+              </b>
+            </div>
+            <div className="institution-strip">
+              <span className="institution-label">
+                AFFILIATIONS & PUBLICATION VENUE
+              </span>
+              <div className="institution-logos">
+                <a
+                  className="institution uva"
+                  href="https://www.virginia.edu/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="University of Virginia"
+                >
+                  <Building2 />
+                  <strong>
+                    University <i>of</i> Virginia
+                  </strong>
+                </a>
+                <a
+                  className="institution mit"
+                  href="https://www.mit.edu/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Massachusetts Institute of Technology"
+                >
+                  <span className="mit-mark">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <strong>MIT</strong>
+                </a>
+                <a
+                  className="institution vast"
+                  href="https://vast.gov.vn/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Vietnam Academy of Science and Technology"
+                >
+                  <Orbit />
+                  <strong>
+                    VAST<small>Vietnam Academy of Science & Technology</small>
+                  </strong>
+                </a>
+                <a
+                  className="institution icml"
+                  href="https://icml.cc/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="International Conference on Machine Learning"
+                >
+                  <span className="icml-mark">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <strong>
+                    ICML
+                    <small>International Conference on Machine Learning</small>
+                  </strong>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="final-cta">
+        <LogoMark />
+        <span>DOMAIN EXPERTISE / STRUCTURED</span>
+        <h2>Expert workflows → agent-ready skills.</h2>
+        <div className="actions">
+          <Button onClick={openDemo}>Open investor demo</Button>
+          <Button onClick={openDemo} subtle>
+            Create sample Skill Pack
+          </Button>
+        </div>
+      </section>
+      <footer>
+        <Mark />
+        <span>Vu-Anh Le · Pre-seed concept demo · 2026</span>
+      </footer>
+    </main>
+  );
+}
+function Info({ n, title, text }: { n: string; title: string; text: string }) {
+  return (
+    <div className="info">
+      <span>{n}</span>
+      <h3>{title}</h3>
+      <p>{text}</p>
+    </div>
+  );
+}
+
+function Shell({
+  page,
+  setPage,
+  exit,
+}: {
+  page: Page;
+  setPage: (p: Page) => void;
+  exit: () => void;
+}) {
+  return (
+    <div className="app">
+      <aside>
+        <Mark word={false} />
+        <div className="side-id">
+          <span>DOMAINIC</span>
+          <small>CONTROL PLANE / DEMO</small>
+        </div>
+        <nav>
+          {nav.map(([id, label, icon]) => (
+            <button
+              onClick={() => setPage(id)}
+              className={page === id ? "active" : ""}
+              key={id}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="side-bottom">
+          <Tag hot>PRE-SEED</Tag>
+          <p>
+            Illustrative metrics
+            <br />
+            Static prototype
+          </p>
+          <button onClick={exit}>
+            <Globe2 /> Public site
+          </button>
+        </div>
+      </aside>
+      <div className="app-main">
+        <header>
+          <div>
+            <span className="eyebrow">DOMAINIC / WORKSPACE</span>
+            <b>{nav.find((n) => n[0] === page)?.[1]}</b>
+          </div>
+          <div className="header-actions">
+            <Tag>ALL SYSTEMS NOMINAL</Tag>
+            <button>
+              <Search />
+            </button>
+            <div className="avatar small">VL</div>
+          </div>
+        </header>
+        <div className="page">
+          {page === "dashboard" ? (
+            <Dashboard setPage={setPage} />
+          ) : page === "builder" ? (
+            <Builder setPage={setPage} />
+          ) : page === "packs" ? (
+            <Packs />
+          ) : page === "evaluation" ? (
+            <Evaluation />
+          ) : page === "runtime" ? (
+            <Runtime />
+          ) : page === "composer" ? (
+            <Composer />
+          ) : page === "marketplace" ? (
+            <Marketplace />
+          ) : page === "failure" ? (
+            <Failure />
+          ) : (
+            <Investor setPage={setPage} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+function PageTitle({
+  k,
+  title,
+  copy,
+  action,
+}: {
+  k: string;
+  title: string;
+  copy: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="page-title">
+      <div>
+        <span>{k}</span>
+        <h1>{title}</h1>
+        <p>{copy}</p>
+      </div>
+      {action}
+    </div>
+  );
+}
+function Metric({
+  label,
+  value,
+  delta,
+}: {
+  label: string;
+  value: string;
+  delta?: string;
+}) {
+  return (
+    <div className="metric">
+      <span>{label}</span>
+      <b>{value}</b>
+      {delta && <small>{delta}</small>}
+    </div>
+  );
+}
+function Panel({
+  title,
+  children,
+  className = "",
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`panel ${className}`}>
+      <div className="panel-title">
+        <b>{title}</b>
+        <span>ILLUSTRATIVE</span>
+      </div>
+      {children}
+    </section>
+  );
+}
+function TrendChart({ kind = "usage" }: { kind?: "usage" | "score" | "fail" }) {
+  return (
+    <ResponsiveContainer width="100%" height={190}>
+      <AreaChart data={trend}>
+        <defs>
+          <linearGradient id={`g${kind}`} x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="0%"
+              stopColor={kind === "fail" ? "#ff705c" : "#b6ff3b"}
+              stopOpacity={0.4}
+            />
+            <stop offset="100%" stopColor="#b6ff3b" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid stroke="#283026" strokeDasharray="3 3" />
+        <XAxis dataKey="n" stroke="#70786c" />
+        <YAxis stroke="#70786c" />
+        <Tooltip
+          contentStyle={{ background: "#11140f", border: "1px solid #384132" }}
+        />
+        <Area
+          type="monotone"
+          dataKey={kind}
+          stroke={kind === "fail" ? "#ff705c" : "#b6ff3b"}
+          fill={`url(#g${kind})`}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+function Dashboard({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <>
+      <PageTitle
+        k="SYSTEM OVERVIEW / 00"
+        title="Domain capability control plane"
+        copy="Operational view across creation, verification, deployment, and learning."
+        action={
+          <Button onClick={() => setPage("builder")}>Create Skill Pack</Button>
+        }
+      />
+      <div className="metrics">
+        <Metric label="ACTIVE SKILL PACKS" value="06" delta="+2 this month" />
+        <Metric label="VERIFIED PACKS" value="04" delta="66.7% of library" />
+        <Metric label="AVG CERTIFICATION" value="91.0" delta="+3.2 pts" />
+        <Metric label="RUNTIME SUCCESS" value="97.4%" delta="+1.8%" />
+        <Metric label="FAILURE RATE" value="4.1%" delta="−0.7%" />
+      </div>
+      <div className="dashboard-grid">
+        <Panel title="USAGE OVER TIME" className="wide">
+          <TrendChart />
+        </Panel>
+        <Panel title="SYSTEM HEALTH">
+          <div className="health">
+            {[
+              "Runtime",
+              "Evaluation engine",
+              "Pack registry",
+              "Failure pipeline",
+              "Marketplace index",
+            ].map((x) => (
+              <p key={x}>
+                <Check />
+                {x}
+                <b>Healthy</b>
+              </p>
+            ))}
+          </div>
+        </Panel>
+        <Panel title="CERTIFICATION TREND">
+          <TrendChart kind="score" />
+        </Panel>
+        <Panel title="RECENT RUNS" className="wide">
+          <table>
+            <tbody>
+              {packs.slice(0, 4).map((p, i) => (
+                <tr key={p.id}>
+                  <td>
+                    <CircleDot />
+                    {p.name}
+                  </td>
+                  <td>{p.domain}</td>
+                  <td>{p.successRate}% success</td>
+                  <td>
+                    <Tag hot>{i === 3 ? "REVIEW" : "COMPLETE"}</Tag>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel>
+      </div>
+    </>
+  );
+}
+function Builder({ setPage }: { setPage: (p: Page) => void }) {
+  const [sop, setSop] = useState(sampleSop);
+  const [stage, setStage] = useState<"idle" | "extracting" | "done">(() =>
+    localStorage.getItem("domainic-pack") ? "done" : "idle",
+  );
+  const generate = () => {
+    setStage("extracting");
+    setTimeout(() => {
+      localStorage.setItem("domainic-pack", JSON.stringify(packs[0]));
+      setStage("done");
+    }, 1200);
+  };
+  return (
+    <>
+      <PageTitle
+        k="BUILDER / SUPPLY ENGINE"
+        title="SOP → governed Skill Pack"
+        copy="Deterministic concept extraction. No LLM or external API is used."
+        action={
+          <Tag hot>{stage === "done" ? "PACK GENERATED" : "CAPTURE MODE"}</Tag>
+        }
+      />
+      <div className="builder-grid">
+        <Panel title="01 / EXPERT WORKFLOW INPUT" className="builder-input">
+          <div className="input-tools">
+            <Button subtle>
+              <Upload /> Add .txt / .md
+            </Button>
+            <button onClick={() => setSop(sampleSop)}>Load sample SOP</button>
+          </div>
+          <textarea value={sop} onChange={(e) => setSop(e.target.value)} />
+          <Button onClick={generate}>
+            {stage === "extracting"
+              ? "Extracting structure…"
+              : "Generate Skill Pack"}
+          </Button>
+        </Panel>
+        <Panel title="EXTRACTION MAP">
+          <div className="extract-map">
+            {components.map((x, i) => (
+              <div key={x} className={stage !== "idle" ? "found" : ""}>
+                <span>0{i + 1}</span>
+                <b>{x}</b>
+                <Check />
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+      {stage === "done" && (
+        <Panel title="GENERATED SKILL PACK" className="generated">
+          <div className="generated-head">
+            <PackageCheck />
+            <div>
+              <Tag hot>DRAFT / READY FOR EVALUATION</Tag>
+              <h2>Literature Review Reproducibility Audit Pack</h2>
+              <p>Research / AI-Biology · v1.0.0 · 9 component classes</p>
+            </div>
+            <div className="actions">
+              <Button subtle onClick={() => setPage("packs")}>
+                Open Skill Pack
+              </Button>
+              <Button onClick={() => setPage("evaluation")}>
+                Run Evaluation
+              </Button>
+            </div>
+          </div>
+          <div className="steps">
+            {packs[0].workflowSteps.map((x, i) => (
+              <div key={x}>
+                <span>{i + 1}</span>
+                {x}
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
+    </>
+  );
+}
+function PackCard({ p, onOpen }: { p: SkillPack; onOpen: () => void }) {
+  return (
+    <button className="pack-card" onClick={onOpen}>
+      <div>
+        <PackageCheck />
+        <Tag hot>{p.status}</Tag>
+      </div>
+      <span>{p.domain}</span>
+      <h3>{p.name}</h3>
+      <p>{p.description}</p>
+      <div className="pack-stats">
+        <b>
+          {p.certificationScore}
+          <small>score</small>
+        </b>
+        <b>
+          {p.successRate}%<small>success</small>
+        </b>
+        <b>
+          {p.installs}
+          <small>installs</small>
+        </b>
+      </div>
+    </button>
+  );
+}
+function Packs() {
+  const [selected, setSelected] = useState<SkillPack | null>(null);
+  return (
+    <>
+      <PageTitle
+        k="SKILL PACK REGISTRY / 06"
+        title="Versioned units of expert capability"
+        copy="Each pack combines operating logic, verification, governance, and deployment metadata."
+      />
+      <div className="pack-grid">
+        {packs.map((p) => (
+          <PackCard p={p} onOpen={() => setSelected(p)} key={p.id} />
+        ))}
+      </div>
+      {selected && (
+        <div className="modal-back" onClick={() => setSelected(null)}>
+          <div className="modal detail" onClick={(e) => e.stopPropagation()}>
+            <button className="close" onClick={() => setSelected(null)}>
+              <X />
+            </button>
+            <Tag hot>
+              {selected.status} · {selected.certificationScore}
+            </Tag>
+            <h2>{selected.name}</h2>
+            <p>{selected.description}</p>
+            <div className="detail-grid">
+              <div>
+                <h4>WORKFLOW STEPS</h4>
+                {selected.workflowSteps.map((x) => (
+                  <p key={x}>
+                    <Check />
+                    {x}
+                  </p>
+                ))}
+              </div>
+              <div>
+                <h4>DOMAIN RULES & GUARDRAILS</h4>
+                {[...selected.domainRules, ...selected.guardrails].map((x) => (
+                  <p key={x}>
+                    <ShieldCheck />
+                    {x}
+                  </p>
+                ))}
+              </div>
+              <div>
+                <h4>RUNTIME PERMISSIONS</h4>
+                {Object.entries(selected.deploymentMetadata).map(([a, b]) => (
+                  <p key={a}>
+                    <LockKeyhole />
+                    {a}: {b}
+                  </p>
+                ))}
+              </div>
+              <div>
+                <h4>VERSION HISTORY</h4>
+                {selected.versionHistory.map((x) => (
+                  <p key={x.version}>
+                    <GitBranch />
+                    {x.version} · {x.note}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+function Evaluation() {
+  const [state, setState] = useState<
+    "Ready" | "Queued" | "Running" | "Certified"
+  >("Ready");
+  const run = () => {
+    setState("Queued");
+    setTimeout(() => setState("Running"), 600);
+    setTimeout(() => setState("Certified"), 1800);
+  };
+  return (
+    <>
+      <PageTitle
+        k="EVALUATION / CERTIFICATION"
+        title="Evidence before deployment"
+        copy="Mock certification for Literature Review Reproducibility Audit Pack."
+        action={
+          <Button onClick={run}>
+            <Play /> Run mock evaluation
+          </Button>
+        }
+      />
+      <div className="evaluation-grid">
+        <div className="score-ring">
+          <div>
+            <b>{state === "Certified" ? "94" : "91"}</b>
+            <span>OVERALL SCORE</span>
+          </div>
+          <Tag hot>{state}</Tag>
+        </div>
+        <Panel title="SCORE TREND">
+          <TrendChart kind="score" />
+        </Panel>
+        <Panel title="CERTIFICATION DIMENSIONS">
+          <div className="bars">
+            {[
+              ["Accuracy", 96],
+              ["Citation verification", 94],
+              ["Tool-use correctness", 93],
+              ["Robustness", 89],
+              ["Compliance / safety", 97],
+              ["Recovery / fallback", 92],
+            ].map(([x, n]) => (
+              <div key={x as string}>
+                <span>{x}</span>
+                <i>
+                  <b style={{ width: `${n}%` }} />
+                </i>
+                <strong>{n}</strong>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+      <Panel title="TEST SUITE">
+        <table>
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Purpose</th>
+              <th>Score</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {packs[0].evalTests.map((t) => (
+              <tr key={t.id}>
+                <td>{t.name}</td>
+                <td>{t.purpose}</td>
+                <td>{t.score}</td>
+                <td>
+                  <Tag hot>{t.status}</Tag>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Panel>
+    </>
+  );
+}
+function Runtime() {
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(false);
+  const run = () => {
+    setRunning(true);
+    setDone(false);
+    setTimeout(() => {
+      setRunning(false);
+      setDone(true);
+    }, 1800);
+  };
+  return (
+    <>
+      <PageTitle
+        k="RUNTIME / GOVERNED EXECUTION"
+        title="Execute with permissions, checks, and logs"
+        copy="Every action is inspectable. Human approval remains in the loop."
+        action={
+          <Button onClick={run}>
+            <Play /> Run Skill Pack
+          </Button>
+        }
+      />
+      <div className="runtime-grid">
+        <Panel title="RUN INTERFACE" className="run-chat">
+          <div className="user-msg">
+            Audit this AI-biology paper summary for reproducibility risks.
+          </div>
+          {(running || done) && (
+            <div className="run-process">
+              {[
+                "Input validated",
+                "Permissions checked",
+                "Crossref lookup simulated",
+                "Citation evidence mapped",
+                "Unsupported claims checked",
+                "Human approval checkpoint",
+              ].map((x, i) => (
+                <div key={x} className={done || i < 3 ? "complete" : ""}>
+                  <span>{done || i < 3 ? <Check /> : <Activity />}</span>
+                  {x}
+                </div>
+              ))}
+            </div>
+          )}
+          {done && (
+            <div className="run-output">
+              <Tag hot>HUMAN REVIEW REQUIRED</Tag>
+              <h3>Audit summary</h3>
+              <p>
+                Two claims need stronger citation support. Dataset availability
+                is documented; code availability remains unverified.
+                Reproducibility risk: medium.
+              </p>
+            </div>
+          )}
+        </Panel>
+        <div>
+          <Panel title="ACTIVE GUARDRAILS">
+            <div className="guardrails">
+              {packs[0].guardrails.map((x) => (
+                <p key={x}>
+                  <ShieldCheck />
+                  {x}
+                  <b>ON</b>
+                </p>
+              ))}
+            </div>
+          </Panel>
+          <Panel title="RUN LOG">
+            <div className="log">
+              run_id: dm_7fa91
+              <br />
+              pack: audit@1.2.0
+              <br />
+              latency: {done ? "1.84s" : "—"}
+              <br />
+              retention: none
+              <br />
+              status: {done ? "awaiting_approval" : "idle"}
+            </div>
+          </Panel>
+        </div>
+      </div>
+    </>
+  );
+}
+function Composer() {
+  const [run, setRun] = useState(false);
+  const nodes = [
+    "Literature Review",
+    "Citation Verification",
+    "Reproducibility Audit",
+    "Grant Outline",
+  ];
+  return (
+    <>
+      <PageTitle
+        k="AGENT COMPOSER / ORCHESTRATION"
+        title="Compose verified capabilities"
+        copy="Guardrails and version constraints inherit across the workflow."
+        action={
+          <Button onClick={() => setRun(true)}>
+            <Play /> Run composed agent
+          </Button>
+        }
+      />
+      <Panel title="RESEARCH-TO-GRANT AGENT" className="composer">
+        <div className="nodes">
+          {nodes.map((x, i) => (
+            <div className={run ? "node done" : "node"} key={x}>
+              <span>0{i + 1}</span>
+              <PackageCheck />
+              <b>{x}</b>
+              <small>v1.{i + 1}.0 · verified</small>
+              {i < nodes.length - 1 && <ArrowRight />}
+            </div>
+          ))}
+        </div>
+        <div className="branch">
+          <GitBranch />
+          <span>Conditional branch: unsupported claim → human review</span>
+          <Tag>GUARDRAILS INHERITED</Tag>
+        </div>
+      </Panel>
+      <div className="metrics">
+        <Metric label="PACKS" value="04" />
+        <Metric label="INHERITED RULES" value="17" />
+        <Metric label="CHECKPOINTS" value="03" />
+        <Metric label="EXPECTED SUCCESS" value="93.8%" />
+      </div>
+    </>
+  );
+}
+function Marketplace() {
+  const [filter, setFilter] = useState("All");
+  return (
+    <>
+      <PageTitle
+        k="MARKETPLACE / DISTRIBUTION"
+        title="A market for verified domain capability"
+        copy="Concept listings only. No real payments, creators, or certifications."
+      />
+      <div className="filters">
+        {[
+          "All",
+          "Research",
+          "AI-Bio",
+          "Healthcare Ops",
+          "Compliance",
+          "Consulting",
+        ].map((x) => (
+          <button
+            className={filter === x ? "active" : ""}
+            onClick={() => setFilter(x)}
+            key={x}
+          >
+            {x}
+          </button>
+        ))}
+      </div>
+      <div className="market-grid">
+        {packs
+          .filter(
+            (p) =>
+              filter === "All" || p.domain.includes(filter.replace(" Ops", "")),
+          )
+          .map((p) => (
+            <div className="listing" key={p.id}>
+              <div>
+                <Library />
+                <Tag hot>{p.status}</Tag>
+              </div>
+              <span>{p.domain}</span>
+              <h3>{p.name}</h3>
+              <p>by {p.creator}</p>
+              <div className="listing-stats">
+                <b>{p.certificationScore} score</b>
+                <b>{p.installs} installs</b>
+                <b>★ 4.8</b>
+              </div>
+              <div className="actions">
+                <Button subtle>View docs</Button>
+                <Button>Install</Button>
+              </div>
+            </div>
+          ))}
+      </div>
+    </>
+  );
+}
+function Failure() {
+  return (
+    <>
+      <PageTitle
+        k="FAILURE INTELLIGENCE / LEARNING LOOP"
+        title="Governed failures become better Skill Packs"
+        copy="Aggregated demo patterns reveal where rules, tools, and tests should improve."
+      />
+      <div className="metrics">
+        <Metric label="FAILURE RATE" value="4.1%" delta="−0.7%" />
+        <Metric label="MTTR" value="18.4m" delta="−14.1%" />
+        <Metric label="OPEN CLUSTERS" value="05" />
+        <Metric label="PRIVACY MODE" value="ON" />
+      </div>
+      <div className="dashboard-grid">
+        <Panel title="FAILURE RATE TREND" className="wide">
+          <TrendChart kind="fail" />
+        </Panel>
+        <Panel title="TOP IMPROVEMENTS">
+          {failures.slice(0, 4).map((f, i) => (
+            <div className="improve" key={f[0]}>
+              <span>0{i + 1}</span>
+              <div>
+                <b>{f[2]}</b>
+                <small>Potential impact: −{28 - i * 5}% failures</small>
+              </div>
+            </div>
+          ))}
+        </Panel>
+      </div>
+      <Panel title="FAILURE CLUSTERS">
+        <table>
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Root cause signal</th>
+              <th>Suggested fix</th>
+              <th>Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {failures.map((f) => (
+              <tr key={f[0]}>
+                <td>{f[0]}</td>
+                <td>{f[1]}</td>
+                <td>{f[2]}</td>
+                <td>
+                  <Tag hot={f[3] === "High"}>{f[3]}</Tag>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Panel>
+    </>
+  );
+}
+const investorPrompt = `Create a Skill Pack for auditing an AI-biology research paper for reproducibility risks.
 
 The workflow should:
 - Identify the paper title, venue, year, and authors.
@@ -63,7 +1369,444 @@ The workflow should:
 - Flag missing citations, unsupported claims, and reproducibility risks.
 - Require human review before final output.
 - Produce a structured audit summary for a research lab.`;
-const investorStages=["Read prompt","Extract workflow","Encode domain rules","Generate eval tests","Attach guardrails","Package Skill Pack","Certify","Deploy"];
-function JourneyBlock({n,kicker,title,children}:{n:string;kicker:string;title:string;children:ReactNode}){return <section className="journey-block"><div className="journey-marker"><span>{n}</span><i/></div><div className="journey-content"><span>{kicker}</span><h2>{title}</h2>{children}</div></section>}
-function Investor({setPage}:{setPage:(p:Page)=>void}){const [progress,setProgress]=useState(-1);const [cert,setCert]=useState<"Ready"|"Queued"|"Running tests"|"Certified">("Ready");const generated=progress===investorStages.length-1;const generate=()=>{setProgress(0);setCert("Ready");investorStages.slice(1).forEach((_,i)=>setTimeout(()=>setProgress(i+1),(i+1)*360))};const reset=()=>{setProgress(-1);setCert("Ready")};const certify=()=>{setCert("Queued");setTimeout(()=>setCert("Running tests"),500);setTimeout(()=>setCert("Certified"),1500)};return <div className="investor-journey"><PageTitle k="INVESTOR MODE / UNIFIED JOURNEY" title="From expert prompt to deployable Skill Pack" copy="Watch Domainic convert one professional workflow into a verified, governed, agent-ready capability." action={<div className="actions"><Button subtle onClick={reset}>Reset demo</Button><Button subtle onClick={()=>setPage("dashboard")}>Jump to full dashboard</Button></div>}/><div className="investor-layout"><main className="journey-main"><section className="prompt-source"><div className="prompt-source-head"><div><span>SOURCE OBJECT / EXPERT WORKFLOW</span><h2>What should the agent know how to do?</h2></div><Tag hot>{progress<0?"AWAITING INPUT":generated?"DEPLOYED":"TRANSFORMING"}</Tag></div><textarea readOnly value={investorPrompt}/><div className="prompt-source-foot"><small>Static demo · Mock extraction · No real paper data uploaded</small><Button onClick={generate}>{progress>=0&&!generated?"Generating Skill Pack…":"Generate Skill Pack"}</Button></div></section><div className="transform-pipeline">{investorStages.map((stage,i)=><div key={stage} className={progress===i?"active":progress>i?"done":""}><span>{progress>i?<Check/>:i+1}</span><b>{stage}</b></div>)}</div>{generated&&<div className="journey-reveal"><JourneyBlock n="01" kicker="EXPERT WORKFLOW INPUT" title="Domainic starts with the language experts already use."><div className="console-prompt"><span>$ ingest --type expert-workflow</span><p>{investorPrompt}</p></div><p className="journey-note">SOPs, checklists, protocols, prompts, and tacit operating rules become the source object.</p></JourneyBlock><JourneyBlock n="02" kicker="BUILDER / FIRST TRANSFORMATION" title="Builder converts the prompt into structured operating logic."><div className="extraction-columns">{[["Workflow steps",["Validate paper metadata","Extract evidence and claims","Assess reproducibility","Request human approval"]],["Domain rules",["Every claim requires evidence","No reproducibility claim without code/data","Separate reported and inferred conclusions"]],["Tools & approvals",["Citation verification lookup","Repository availability probe","Human review before final output"]],["Failure conditions",["Missing citation","Unsupported claim","Ambiguous dataset","Tool timeout"]]].map(([title,items])=><div key={title as string}><span>{title}</span>{(items as string[]).map(x=><p key={x}><Check/>{x}</p>)}</div>)}</div></JourneyBlock><JourneyBlock n="03" kicker="SKILL PACK OBJECT / CENTRAL ARTIFACT" title="The workflow becomes a reusable Skill Pack."><div className="journey-pack"><div className="journey-pack-head"><PackageCheck/><div><Tag hot>GENERATED · READY FOR EVALUATION</Tag><h3>AI-Biology Reproducibility Audit Pack</h3><p>Research / AI-Biology · v1.0.0</p></div><strong>9<small>governed component classes</small></strong></div><div className="journey-components">{components.map((x,i)=><span key={x}><b>0{i+1}</b>{x}</span>)}</div></div></JourneyBlock><JourneyBlock n="04" kicker="EVALUATION & CERTIFICATION" title="Domainic tests the Skill Pack before agents use it."><div className="cert-stage"><div className="cert-score"><b>{cert==="Certified"?"94":"—"}</b><span>ILLUSTRATIVE SCORE</span><Tag hot>{cert}</Tag><Button onClick={certify}>Run mock certification</Button></div><div className="cert-tests">{[["Citation verification",96],["Unsupported claim detection",93],["Dataset extraction",91],["Human-review checkpoint",100],["Failure recovery",89],["Safety / compliance",97]].map(([x,n])=><p key={x as string} className={cert==="Certified"?"pass":""}><span>{cert==="Certified"?<Check/>:<CircleDot/>}{x}</span><b>{cert==="Certified"?`${n}%`:"Pending"}</b></p>)}</div></div></JourneyBlock><JourneyBlock n="05" kicker="RUNTIME DEPLOYMENT" title="The verified Skill Pack becomes an agent capability."><div className="runtime-journey"><div className="runtime-request"><span>USER REQUEST</span><p>Audit this AI-biology paper summary for reproducibility risks.</p></div><div className="runtime-chain">{["Input validated","Pack selected","Guardrails active","Tool calls simulated","Human checkpoint","Structured audit output"].map(x=><div key={x}><Check/>{x}</div>)}</div><div className="runtime-result"><Tag hot>AUDIT LOGGED · HUMAN REVIEW REQUIRED</Tag><p>Two claims require stronger evidence. Dataset availability documented; code availability remains unverified.</p></div></div></JourneyBlock><JourneyBlock n="06" kicker="FAILURE INTELLIGENCE / LEARNING LOOP" title="Every run improves the pack."><div className="failure-journey"><div>{["Missing citation","Unsupported claim","Ambiguous dataset description","Tool timeout","Human approval required"].map((x,i)=><p key={x}><span>0{i+1}</span>{x}</p>)}</div><div>{["Add citation strictness rule","Add dataset-name disambiguation test","Add fallback for missing code repositories","Raise confidence threshold before final answer"].map(x=><p key={x}><ArrowRight/>{x}</p>)}</div></div></JourneyBlock><JourneyBlock n="07" kicker="COMPOSER / MARKETPLACE EXPANSION" title="One Skill Pack becomes reusable infrastructure."><div className="reuse-grid"><div><span>AGENT COMPOSER</span><div className="reuse-flow">{["Literature Review","Citation Verification","Reproducibility Audit","Grant Outline"].map((x,i)=><b key={x}>{x}{i<3&&<ArrowRight/>}</b>)}</div></div><div><span>MARKETPLACE LISTING</span><PackageCheck/><h3>AI-Biology Reproducibility Audit Pack</h3><p>Domainic Research Workspace</p><Tag>PRIVATE WORKSPACE · DEMO LISTING</Tag></div></div></JourneyBlock></div>}</main><aside className="takeaway"><span>WHY THIS MATTERS</span>{["Experts already know the workflow.","Domainic turns it into a reusable software object.","Evaluation makes the object trustworthy.","Runtime and failures make the object improve."].map((x,i)=><p key={x}><b>0{i+1}</b>{x}</p>)}<div><LogoMark/><strong>Investor takeaway</strong><p>Domainic is building the supply layer for trusted agent skills.</p></div><small>All metrics and operations are illustrative.</small></aside></div></div>}
-export default function App(){const [demo,setDemo]=useState(location.hash.startsWith("#/demo"));const [page,setPage]=useState<Page>("dashboard");useEffect(()=>{location.hash=demo?"/demo":""},[demo]);return <>{demo?<Shell page={page} setPage={setPage} exit={()=>setDemo(false)}/>:<Landing openDemo={()=>setDemo(true)}/>}<InvestorContactWidget/></>}
+const investorStages = [
+  "Read prompt",
+  "Extract workflow",
+  "Encode domain rules",
+  "Generate eval tests",
+  "Attach guardrails",
+  "Package Skill Pack",
+  "Certify",
+  "Deploy",
+];
+function JourneyBlock({
+  n,
+  kicker,
+  title,
+  children,
+}: {
+  n: string;
+  kicker: string;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="journey-block">
+      <div className="journey-marker">
+        <span>{n}</span>
+        <i />
+      </div>
+      <div className="journey-content">
+        <span>{kicker}</span>
+        <h2>{title}</h2>
+        {children}
+      </div>
+    </section>
+  );
+}
+function JourneyCertification() {
+  const [status, setStatus] = useState<
+    "Ready" | "Queued" | "Running tests" | "Certified"
+  >("Ready");
+  const run = () => {
+    setStatus("Queued");
+    window.setTimeout(() => setStatus("Running tests"), 500);
+    window.setTimeout(() => setStatus("Certified"), 1500);
+  };
+  return (
+    <div className="cert-stage">
+      <div className="cert-score">
+        <b>{status === "Certified" ? "94" : "—"}</b>
+        <span>ILLUSTRATIVE SCORE</span>
+        <Tag hot>{status}</Tag>
+        <button className="btn" type="button" onClick={run}>
+          Run mock certification <ArrowRight size={14} />
+        </button>
+      </div>
+      <div className="cert-tests">
+        {[
+          ["Citation verification", 96],
+          ["Unsupported claim detection", 93],
+          ["Dataset extraction", 91],
+          ["Human-review checkpoint", 100],
+          ["Failure recovery", 89],
+          ["Safety / compliance", 97],
+        ].map(([test, score]) => (
+          <p
+            key={test as string}
+            className={status === "Certified" ? "pass" : ""}
+          >
+            <span>
+              {status === "Certified" ? <Check /> : <CircleDot />}
+              {test}
+            </span>
+            <b>{status === "Certified" ? `${score}%` : "Pending"}</b>
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+function Investor({ setPage }: { setPage: (p: Page) => void }) {
+  const [progress, setProgress] = useState(-1);
+  const [cert, setCert] = useState<
+    "Ready" | "Queued" | "Running tests" | "Certified"
+  >("Ready");
+  const generated = progress === investorStages.length - 1;
+  const generate = () => {
+    setProgress(0);
+    setCert("Ready");
+    investorStages
+      .slice(1)
+      .forEach((_, i) => setTimeout(() => setProgress(i + 1), (i + 1) * 360));
+  };
+  const reset = () => {
+    setProgress(-1);
+    setCert("Ready");
+  };
+  const certify = () => {
+    setCert("Queued");
+    window.setTimeout(() => setCert("Running tests"), 500);
+    window.setTimeout(() => setCert("Certified"), 1500);
+  };
+  return (
+    <div className="investor-journey">
+      <PageTitle
+        k="INVESTOR MODE / UNIFIED JOURNEY"
+        title="From expert prompt to deployable Skill Pack"
+        copy="Watch Domainic convert one professional workflow into a verified, governed, agent-ready capability."
+        action={
+          <div className="actions">
+            <Button subtle onClick={reset}>
+              Reset demo
+            </Button>
+            <Button subtle onClick={() => setPage("dashboard")}>
+              Jump to full dashboard
+            </Button>
+          </div>
+        }
+      />
+      <div className="investor-layout">
+        <main className="journey-main">
+          <section className="prompt-source">
+            <div className="prompt-source-head">
+              <div>
+                <span>SOURCE OBJECT / EXPERT WORKFLOW</span>
+                <h2>What should the agent know how to do?</h2>
+              </div>
+              <Tag hot>
+                {progress < 0
+                  ? "AWAITING INPUT"
+                  : generated
+                    ? "DEPLOYED"
+                    : "TRANSFORMING"}
+              </Tag>
+            </div>
+            <textarea readOnly value={investorPrompt} />
+            <div className="prompt-source-foot">
+              <small>
+                Static demo · Mock extraction · No real paper data uploaded
+              </small>
+              <Button onClick={generate}>
+                {progress >= 0 && !generated
+                  ? "Generating Skill Pack…"
+                  : "Generate Skill Pack"}
+              </Button>
+            </div>
+          </section>
+          <div className="transform-pipeline">
+            {investorStages.map((stage, i) => (
+              <div
+                key={stage}
+                className={
+                  progress === i ? "active" : progress > i ? "done" : ""
+                }
+              >
+                <span>{progress > i ? <Check /> : i + 1}</span>
+                <b>{stage}</b>
+              </div>
+            ))}
+          </div>
+          {generated && (
+            <div className="journey-reveal">
+              <JourneyBlock
+                n="01"
+                kicker="EXPERT WORKFLOW INPUT"
+                title="Domainic starts with the language experts already use."
+              >
+                <div className="console-prompt">
+                  <span>$ ingest --type expert-workflow</span>
+                  <p>{investorPrompt}</p>
+                </div>
+                <p className="journey-note">
+                  SOPs, checklists, protocols, prompts, and tacit operating
+                  rules become the source object.
+                </p>
+              </JourneyBlock>
+              <JourneyBlock
+                n="02"
+                kicker="BUILDER / FIRST TRANSFORMATION"
+                title="Builder converts the prompt into structured operating logic."
+              >
+                <div className="extraction-columns">
+                  {[
+                    [
+                      "Workflow steps",
+                      [
+                        "Validate paper metadata",
+                        "Extract evidence and claims",
+                        "Assess reproducibility",
+                        "Request human approval",
+                      ],
+                    ],
+                    [
+                      "Domain rules",
+                      [
+                        "Every claim requires evidence",
+                        "No reproducibility claim without code/data",
+                        "Separate reported and inferred conclusions",
+                      ],
+                    ],
+                    [
+                      "Tools & approvals",
+                      [
+                        "Citation verification lookup",
+                        "Repository availability probe",
+                        "Human review before final output",
+                      ],
+                    ],
+                    [
+                      "Failure conditions",
+                      [
+                        "Missing citation",
+                        "Unsupported claim",
+                        "Ambiguous dataset",
+                        "Tool timeout",
+                      ],
+                    ],
+                  ].map(([title, items]) => (
+                    <div key={title as string}>
+                      <span>{title}</span>
+                      {(items as string[]).map((x) => (
+                        <p key={x}>
+                          <Check />
+                          {x}
+                        </p>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </JourneyBlock>
+              <JourneyBlock
+                n="03"
+                kicker="SKILL PACK OBJECT / CENTRAL ARTIFACT"
+                title="The workflow becomes a reusable Skill Pack."
+              >
+                <div className="journey-pack">
+                  <div className="journey-pack-head">
+                    <PackageCheck />
+                    <div>
+                      <Tag hot>GENERATED · READY FOR EVALUATION</Tag>
+                      <h3>AI-Biology Reproducibility Audit Pack</h3>
+                      <p>Research / AI-Biology · v1.0.0</p>
+                    </div>
+                    <strong>
+                      9<small>governed component classes</small>
+                    </strong>
+                  </div>
+                  <div className="journey-components">
+                    {components.map((x, i) => (
+                      <span key={x}>
+                        <b>0{i + 1}</b>
+                        {x}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </JourneyBlock>
+              <JourneyBlock
+                n="04"
+                kicker="EVALUATION & CERTIFICATION"
+                title="Domainic tests the Skill Pack before agents use it."
+              >
+                <div className="cert-stage">
+                  <div className="cert-score">
+                    <b>{cert === "Certified" ? "94" : "—"}</b>
+                    <span>ILLUSTRATIVE SCORE</span>
+                    <Tag hot>{cert}</Tag>
+                    <button className="btn" type="button" onClick={certify}>
+                      Run mock certification <ArrowRight size={14} />
+                    </button>
+                  </div>
+                  <div className="cert-tests">
+                    {[
+                      ["Citation verification", 96],
+                      ["Unsupported claim detection", 93],
+                      ["Dataset extraction", 91],
+                      ["Human-review checkpoint", 100],
+                      ["Failure recovery", 89],
+                      ["Safety / compliance", 97],
+                    ].map(([x, n]) => (
+                      <p
+                        key={x as string}
+                        className={cert === "Certified" ? "pass" : ""}
+                      >
+                        <span>
+                          {cert === "Certified" ? <Check /> : <CircleDot />}
+                          {x}
+                        </span>
+                        <b>{cert === "Certified" ? `${n}%` : "Pending"}</b>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </JourneyBlock>
+              <JourneyBlock
+                n="05"
+                kicker="RUNTIME DEPLOYMENT"
+                title="The verified Skill Pack becomes an agent capability."
+              >
+                <div className="runtime-journey">
+                  <div className="runtime-request">
+                    <span>USER REQUEST</span>
+                    <p>
+                      Audit this AI-biology paper summary for reproducibility
+                      risks.
+                    </p>
+                  </div>
+                  <div className="runtime-chain">
+                    {[
+                      "Input validated",
+                      "Pack selected",
+                      "Guardrails active",
+                      "Tool calls simulated",
+                      "Human checkpoint",
+                      "Structured audit output",
+                    ].map((x) => (
+                      <div key={x}>
+                        <Check />
+                        {x}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="runtime-result">
+                    <Tag hot>AUDIT LOGGED · HUMAN REVIEW REQUIRED</Tag>
+                    <p>
+                      Two claims require stronger evidence. Dataset availability
+                      documented; code availability remains unverified.
+                    </p>
+                  </div>
+                </div>
+              </JourneyBlock>
+              <JourneyBlock
+                n="06"
+                kicker="FAILURE INTELLIGENCE / LEARNING LOOP"
+                title="Every run improves the pack."
+              >
+                <div className="failure-journey">
+                  <div>
+                    {[
+                      "Missing citation",
+                      "Unsupported claim",
+                      "Ambiguous dataset description",
+                      "Tool timeout",
+                      "Human approval required",
+                    ].map((x, i) => (
+                      <p key={x}>
+                        <span>0{i + 1}</span>
+                        {x}
+                      </p>
+                    ))}
+                  </div>
+                  <div>
+                    {[
+                      "Add citation strictness rule",
+                      "Add dataset-name disambiguation test",
+                      "Add fallback for missing code repositories",
+                      "Raise confidence threshold before final answer",
+                    ].map((x) => (
+                      <p key={x}>
+                        <ArrowRight />
+                        {x}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </JourneyBlock>
+              <JourneyBlock
+                n="07"
+                kicker="COMPOSER / MARKETPLACE EXPANSION"
+                title="One Skill Pack becomes reusable infrastructure."
+              >
+                <div className="reuse-grid">
+                  <div>
+                    <span>AGENT COMPOSER</span>
+                    <div className="reuse-flow">
+                      {[
+                        "Literature Review",
+                        "Citation Verification",
+                        "Reproducibility Audit",
+                        "Grant Outline",
+                      ].map((x, i) => (
+                        <b key={x}>
+                          {x}
+                          {i < 3 && <ArrowRight />}
+                        </b>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <span>MARKETPLACE LISTING</span>
+                    <PackageCheck />
+                    <h3>AI-Biology Reproducibility Audit Pack</h3>
+                    <p>Domainic Research Workspace</p>
+                    <Tag>PRIVATE WORKSPACE · DEMO LISTING</Tag>
+                  </div>
+                </div>
+              </JourneyBlock>
+            </div>
+          )}
+        </main>
+        <aside className="takeaway">
+          <span>WHY THIS MATTERS</span>
+          {[
+            "Experts already know the workflow.",
+            "Domainic turns it into a reusable software object.",
+            "Evaluation makes the object trustworthy.",
+            "Runtime and failures make the object improve.",
+          ].map((x, i) => (
+            <p key={x}>
+              <b>0{i + 1}</b>
+              {x}
+            </p>
+          ))}
+          <div>
+            <LogoMark />
+            <strong>Investor takeaway</strong>
+            <p>
+              Domainic is building the supply layer for trusted agent skills.
+            </p>
+          </div>
+          <small>All metrics and operations are illustrative.</small>
+        </aside>
+      </div>
+    </div>
+  );
+}
+export default function App() {
+  const [demo, setDemo] = useState(location.hash.startsWith("#/demo"));
+  const [page, setPage] = useState<Page>("dashboard");
+  useEffect(() => {
+    location.hash = demo ? "/demo" : "";
+  }, [demo]);
+  return (
+    <>
+      {demo ? (
+        <Shell page={page} setPage={setPage} exit={() => setDemo(false)} />
+      ) : (
+        <Landing openDemo={() => setDemo(true)} />
+      )}
+      <InvestorContactWidget />
+    </>
+  );
+}
