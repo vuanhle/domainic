@@ -1,0 +1,4 @@
+export type EvalTest={id:string;name:string;purpose:string;score:number;status:"pass"|"warning"|"fail"};
+export type VersionEntry={version:string;date:string;note:string};
+export type SkillPack={id:string;name:string;domain:string;version:string;status:"draft"|"testing"|"certified"|"deployed";certificationScore:number;successRate:number;installs:number;creator:string;description:string;components:string[];workflowSteps:string[];domainRules:string[];toolMappings:string[];evalTests:EvalTest[];guardrails:string[];failureHandling:string[];deploymentMetadata:Record<string,string>;versionHistory:VersionEntry[]};
+export type FounderProfile={name:string;role:string;affiliation:string;researchFocus:string;experienceSummary:string;institutions:string[];applicationAreas:string[];publications:string[];note:string};

@@ -1,0 +1,23 @@
+import type { FounderProfile, SkillPack } from "./types";
+export const sampleSop=`Literature Review Reproducibility Audit for AI-Biology Papers
+
+Check paper title, venue, year, and authors. Verify every citation against the source.
+Extract datasets, baselines, metrics, and experimental conditions. Identify reproducibility risks.
+Check whether code and data are available. Flag unsupported claims and missing evidence.
+Produce a structured audit summary. Require human review before final output.`;
+const base={
+ creator:"Domainic demo",components:["Prompts","Tool calls","API connections","Workflow logic","Domain rules","Evaluation tests","Guardrails","Failure handling","Deployment metadata"],
+ workflowSteps:["Validate paper metadata","Verify citations","Extract datasets and baselines","Assess reproducibility risks","Check code and data availability","Flag unsupported claims","Produce audit summary","Request human approval"],
+ domainRules:["Every factual claim requires a source","Separate reported results from inferred conclusions","Do not mark reproducible without code and data evidence","Human approval is required before final output"],
+ toolMappings:["Crossref metadata lookup","Semantic Scholar citation check","Repository availability probe","Structured audit renderer"],
+ evalTests:[{id:"e1",name:"Metadata accuracy",purpose:"Verify core paper fields",score:96,status:"pass" as const},{id:"e2",name:"Citation verification",purpose:"Validate evidence links",score:94,status:"pass" as const},{id:"e3",name:"Unsupported claim detection",purpose:"Catch claims without evidence",score:89,status:"warning" as const},{id:"e4",name:"Recovery behavior",purpose:"Handle missing sources",score:92,status:"pass" as const}],
+ guardrails:["Citation required","Unsupported claim detection","Human approval before final","No sensitive data retention"],
+ failureHandling:["Retry transient tool failures","Route missing citation to human review","Return partial audit with explicit gaps","Log ambiguous SOP rules"],
+ deploymentMetadata:{region:"US East (illustrative)",retention:"None",approval:"Required",runtime:"Domainic mock v0.1"},
+ versionHistory:[{version:"1.2.0",date:"Jun 10, 2026",note:"Added evidence availability check"},{version:"1.1.0",date:"Jun 02, 2026",note:"Improved citation recovery"}]
+};
+const names=[["literature","Literature Review Reproducibility Audit Pack","Research / AI-Biology",94,98.2,1240,"certified"],["grant","Grant Outline Assistant Pack","Academic Research",88,94.6,630,"deployed"],["experiment","Experiment Planning Pack","Research Operations",91,96.1,842,"certified"],["citation","Citation Verification Pack","Research Integrity",96,99.1,2150,"deployed"],["protein","Protein / Molecule Benchmark Builder Pack","Computational Biology",87,92.8,418,"testing"],["healthcare","Healthcare Intake Routing Pack","Healthcare Operations",90,97.4,328,"certified"]] as const;
+export const packs:SkillPack[]=names.map(([id,name,domain,score,success,installs,status],i)=>({...base,id,name,domain,version:`1.${i+1}.0`,status,certificationScore:score,successRate:success,installs,description:i===0?"Audits AI-biology literature for evidence quality and reproducibility risk.":"A governed workflow module that turns expert operating logic into an agent-ready capability."}));
+export const founder:FounderProfile={name:"Vu-Anh Le",role:"Solo Founder",affiliation:"Computer Science PhD · University of Virginia",researchFocus:"Responsible AI for science and engineering",experienceSummary:"Five years of research-to-product experience across regulated AI models and software systems.",institutions:["MIT connected work","Institute of Information Technology · VAST"],applicationAreas:["Cyberthreat detection","Chemical safety calculation","Domain-specific AI automation"],publications:["ICML publication record"],note:"Founder profile is presented for concept-demo context and should be updated with verified links before investor distribution."};
+export const trend=[{n:"W1",usage:412,score:86,fail:7.2},{n:"W2",usage:548,score:88,fail:6.6},{n:"W3",usage:692,score:89,fail:6.1},{n:"W4",usage:744,score:91,fail:5.4},{n:"W5",usage:932,score:92,fail:4.8},{n:"W6",usage:1128,score:94,fail:4.1}];
+export const failures=[["Unsupported claim","Claims lack direct source evidence","Add stricter citation enforcement","High"],["Missing citation","Citation absent or not linked","Require source link before synthesis","High"],["Tool timeout","External lookup did not respond","Add retry and fallback logic","Medium"],["Ambiguous SOP rule","Expert rule has multiple interpretations","Route rule to expert review","Medium"],["Partial extraction","Dataset details were incomplete","Add completeness test","Low"]];
