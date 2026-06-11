@@ -1459,6 +1459,9 @@ function Investor({ setPage }: { setPage: (p: Page) => void }) {
     investorStages
       .slice(1)
       .forEach((_, i) => setTimeout(() => setProgress(i + 1), (i + 1) * 360));
+    window.setTimeout(() => setCert("Queued"), 2700);
+    window.setTimeout(() => setCert("Running tests"), 3200);
+    window.setTimeout(() => setCert("Certified"), 4200);
   };
   const reset = () => {
     setProgress(-1);
