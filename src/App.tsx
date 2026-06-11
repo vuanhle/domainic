@@ -1634,7 +1634,12 @@ function Investor({ setPage }: { setPage: (p: Page) => void }) {
                     <b>{cert === "Certified" ? "94" : "—"}</b>
                     <span>ILLUSTRATIVE SCORE</span>
                     <Tag hot>{cert}</Tag>
-                    <button className="btn" type="button" onClick={certify}>
+                    <button
+                      className="btn"
+                      type="button"
+                      onPointerDown={certify}
+                      onClick={certify}
+                    >
                       Run mock certification <ArrowRight size={14} />
                     </button>
                   </div>
