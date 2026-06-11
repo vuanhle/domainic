@@ -6,16 +6,21 @@ const MESSAGE = "Interested? We are open for preseed-round - contact mcu7uh@virg
 export function InvestorContactWidget() {
   const [open, setOpen] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
+  const pinnedOpen = useRef(false);
 
   useEffect(() => {
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse") return;
+      if (pinnedOpen.current) return;
       const distanceFromRight = window.innerWidth - event.clientX;
       const distanceFromBottom = window.innerHeight - event.clientY;
       setOpen(distanceFromRight < 190 && distanceFromBottom < 170);
     };
     const onPointerDown = (event: PointerEvent) => {
-      if (!widgetRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!widgetRef.current?.contains(event.target as Node)) {
+        pinnedOpen.current = false;
+        setOpen(false);
+      }
     };
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerdown", onPointerDown);
@@ -39,7 +44,10 @@ export function InvestorContactWidget() {
         className="investor-contact-trigger"
         aria-label={open ? "Close investor contact" : "Open investor contact"}
         aria-expanded={open}
-        onClick={() => setOpen(value => !value)}
+        onClick={() => setOpen(value => {
+          pinnedOpen.current = !value;
+          return !value;
+        })}
       >
         {open ? <X className="contact-close" /> : <img src={`${import.meta.env.BASE_URL}domainic-mark.png`} alt="" />}
       </button>
