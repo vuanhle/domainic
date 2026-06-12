@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Mail, X } from "lucide-react";
 
-const MESSAGE = "Interested? We are open for preseed-round - contact mcu7uh@virginia.edu!";
+const MESSAGE = "Interested? We are open for preseed-round - contact mcu7uh@virginia.edu and book a demo!";
 
 export function InvestorContactWidget() {
   const [open, setOpen] = useState(false);
